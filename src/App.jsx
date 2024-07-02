@@ -4,8 +4,39 @@ import BooksBtn from "./BooksBtn.jsx";
 import Book from "./Book.jsx";
 
 function App() {
-  const booksDataArr = books.library;
   const [booksSaved, setBooksSaved] = useState([]);
+  const [range, setRange] = useState(1250);
+
+  const booksDataJSON = books.library;
+  const [booksData, setBooksData] = useState(booksDataJSON);
+
+  const handleChangeSelect = (e) => {
+    const value = e.target.value;
+
+    const booksDataCopyFilter = booksDataJSON.filter(({ book }) => {
+      if (book.genre == value) {
+        return book;
+      }
+    });
+    if (booksDataCopyFilter.length < 1) {
+      setBooksData(booksDataJSON);
+    } else {
+      setBooksData(booksDataCopyFilter);
+    }
+  };
+
+  const handleChangeRange = (e) => {
+    const value = parseInt(e.target.value);
+    setRange(value);
+
+    const booksDataCopyFilter = booksDataJSON.filter(({ book }) => {
+      if (book.pages < value) {
+        return book;
+      }
+    });
+
+    setBooksData(booksDataCopyFilter);
+  };
 
   const isBookSaved = (book) => {
     return booksSaved.some((savedBook) => savedBook.ISBN === book.ISBN);
@@ -14,23 +45,40 @@ function App() {
   return (
     <>
       <main className="w-full h-full flex text-white playwrite-ng-modern-default border rounded-lg p-8 gap-12">
-        <section className="flex flex-col gap-12 w-3/4 h-full">
-          <h1 className="playwrite-ng-modern-titles text-4xl">
-            8 Libros disponibles
-          </h1>
+        <section className="flex flex-col gap-8 w-3/4 h-full">
+          <div className="flex flex-col gap-4">
+            <h1 className="playwrite-ng-modern-titles text-4xl">
+              {`${booksData.length} Libros disponibles`}
+            </h1>
+            <h4 className="">{`${booksSaved.length} en la lista de lectura`}</h4>
+          </div>
           <div className="flex gap-12">
             <div className="flex flex-col gap-6">
-              <p className="text-lg">Filtrar por páginas</p>
-              <input type="range" />
+              <p className="text-lg leading-relaxed">{`Filtrar por páginas (${range})`}</p>
+              <input
+                onChange={(e) => {
+                  handleChangeRange(e);
+                }}
+                type="range"
+                min="250"
+                max="1250"
+                step="100"
+              />
             </div>
             <div className="flex flex-col gap-2">
-              <p className="text-lg">Filtras por genero</p>
+              <p className="text-lg leading-relaxed">Filtras por genero</p>
               <label className="flex border w-fit text-sm">
-                <select className="bg-[#0e0e0e] p-1 cursor-pointer">
-                  <option value="fantasy">Fantasía</option>
-                  <option value="science fiction">Ciencia ficción</option>
-                  <option value="zombies">Zombis</option>
-                  <option value="terror">Terror</option>
+                <select
+                  onChange={(e) => {
+                    handleChangeSelect(e);
+                  }}
+                  className="bg-[#0e0e0e] p-1 cursor-pointer"
+                >
+                  <option value="Todos">Todos</option>
+                  <option value="Fantasía">Fantasía</option>
+                  <option value="Ciencia ficción">Ciencia ficción</option>
+                  <option value="Zombies">Zombis</option>
+                  <option value="Terror">Terror</option>
                 </select>
                 <span className="border-l">
                   <svg
@@ -63,7 +111,7 @@ function App() {
             </div>
           </div>
           <div className="grid grid-cols-4 gap-8">
-            {booksDataArr.map(({ book }) => (
+            {booksData.map(({ book }) => (
               <div key={book.ISBN} className="relative">
                 <Book book={book} />
                 <BooksBtn
