@@ -6,21 +6,28 @@ import Book from "./Book.jsx";
 function App() {
   const [booksSaved, setBooksSaved] = useState([]);
   const [range, setRange] = useState(1250);
+  const [genre, setGenre] = useState("Todos");
 
   const booksDataJSON = books.library;
   const [booksData, setBooksData] = useState(booksDataJSON);
 
   const handleChangeSelect = (e) => {
     const value = e.target.value;
+    setGenre(value);
 
-    const booksDataCopyFilter = booksDataJSON.filter(({ book }) => {
-      if (book.genre == value) {
-        return book;
-      }
-    });
-    if (booksDataCopyFilter.length < 1) {
-      setBooksData(booksDataJSON);
+    if (value == "Todos") {
+      const booksDataCopyFilter = booksDataJSON.filter(({ book }) => {
+        if (book.pages < range) {
+          return book;
+        }
+      });
+      setBooksData(booksDataCopyFilter);
     } else {
+      const booksDataCopyFilter = booksDataJSON.filter(({ book }) => {
+        if (book.genre == value && book.pages < range) {
+          return book;
+        }
+      });
       setBooksData(booksDataCopyFilter);
     }
   };
@@ -29,13 +36,21 @@ function App() {
     const value = parseInt(e.target.value);
     setRange(value);
 
-    const booksDataCopyFilter = booksDataJSON.filter(({ book }) => {
-      if (book.pages < value) {
-        return book;
-      }
-    });
-
-    setBooksData(booksDataCopyFilter);
+    if (genre != "Todos") {
+      const booksDataCopyFilter = booksDataJSON.filter(({ book }) => {
+        if (book.pages < value && book.genre == genre) {
+          return book;
+        }
+      });
+      setBooksData(booksDataCopyFilter);
+    } else {
+      const booksDataCopyFilter = booksDataJSON.filter(({ book }) => {
+        if (book.pages < value) {
+          return book;
+        }
+      });
+      setBooksData(booksDataCopyFilter);
+    }
   };
 
   const isBookSaved = (book) => {
@@ -52,7 +67,7 @@ function App() {
             </h1>
             <h4 className="">{`${booksSaved.length} en la lista de lectura`}</h4>
           </div>
-          <div className="flex gap-12">
+          <div className="flex gap-8">
             <div className="flex flex-col gap-6">
               <p className="text-lg leading-relaxed">{`Filtrar por páginas (${range})`}</p>
               <input
